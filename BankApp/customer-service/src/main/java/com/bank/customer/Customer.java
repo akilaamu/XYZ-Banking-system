@@ -14,16 +14,11 @@ public class Customer {
 
     private String name;
     private String email;
+    private double balance;
 
-    // Constructors
-    public Customer() {}
-
-    public Customer(String name, String email) {
-        this.name = name;
-        this.email = email;
+    public Customer() {
     }
 
-    // Getters & Setters
     public Long getId() {
         return id;
     }
@@ -46,5 +41,13 @@ public class Customer {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }
