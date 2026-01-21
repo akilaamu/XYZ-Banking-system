@@ -1,1 +1,79 @@
+trigger:
+- main
+
+variables:
+  acrName: myacr
+  acrLoginServer: myacr.azurecr.io
+  imageTag: v1
+  namespace: bank-app
+
+stages:
+
+# =========================
+# BUILD STAGE
+# =========================
+- stage: Build
+  displayName: Build & Push Images
+  jobs:
+  - job: BuildPush
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - checkout: self
+
+    # Login to ACR
+    - task: AzureCLI@2
+      displayName: ACR Login
+      inputs:
+        azureSubscription: 'Azure-Service-Connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az acr login --name $(acrName)
+
+    # Build & Push All Services
+    - script: |
+        services="customer-service transaction-service loan-service notification-service web-ui"
+        for svc in $services
+        do
+          echo "Building $svc"
+          cd $svc
+          mvn clean package -DskipTests
+          docker build -t $(acrLoginServer)/$svc:$(imageTag) .
+          docker push $(acrLoginServer)/$svc:$(imageTag)
+          cd ..
+        done
+      displayName: Build & Push Docker Images
+
+# =========================
+# DEPLOY STAGE
+# =========================
+- stage: Deploy
+  displayName: Deploy to AKS using Helm
+  dependsOn: Build
+  jobs:
+  - job: HelmDeploy
+    pool:
+      vmImage: ubuntu-latest
+
+    steps:
+    - checkout: self
+
+    - task: AzureCLI@2
+      displayName: Helm Deploy
+      inputs:
+        azureSubscription: 'Azure-Service-Connection'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az aks get-credentials --resource-group my-rg --name my-aks --overwrite-existing
+
+          kubectl create namespace $(namespace) --dry-run=client -o yaml | kubectl apply -f -
+
+          helm upgrade --install customer-service helm/customer-service -n $(namespace)
+          helm upgrade --install transaction-service helm/transaction-service -n $(namespace)
+          helm upgrade --install loan-service helm/loan-service -n $(namespace)
+          helm upgrade --install notification-service helm/notification-service -n $(namespace)
+          helm upgrade --install web-ui helm/web-ui -n $(namespace)
 
