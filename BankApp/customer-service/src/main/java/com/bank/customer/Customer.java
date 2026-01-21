@@ -1,3 +1,4 @@
+@'
 package com.bank.customer;
 
 import jakarta.persistence.Entity;
@@ -30,3 +31,4 @@ public class Customer {
     public double getBalance() { return balance; }
     public void setBalance(double balance) { this.balance = balance; }
 }
+'@ | Set-Content -Encoding utf8NoBOM src\main\java\com\bank\customer\Customer.java
