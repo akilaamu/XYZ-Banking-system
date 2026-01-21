@@ -2,8 +2,8 @@ trigger:
 - main
 
 variables:
-  acrName: myacr
-  acrLoginServer: myacr.azurecr.io
+  acrName: myacrbank
+  acrLoginServer: myacrbank.azurecr.io
   imageTag: v1
   namespace: bank-app
 
