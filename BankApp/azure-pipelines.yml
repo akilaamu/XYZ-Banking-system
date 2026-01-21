@@ -6,6 +6,9 @@ variables:
   acrLoginServer: myacrbank.azurecr.io
   imageTag: v1
   namespace: bank-app
+   # (Global variables)
+  resourceGroup: Rg-bank
+  aksName: demo-aks-bank
 
 stages:
 
@@ -67,7 +70,8 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          az aks get-credentials --resource-group my-rg --name my-aks --overwrite-existing
+          az aks get-credentials --resource-group $(resourceGroup) --name $(aksName) --overwrite-existing
+
 
           kubectl create namespace $(namespace) --dry-run=client -o yaml | kubectl apply -f -
 
@@ -76,4 +80,3 @@ stages:
           helm upgrade --install loan-service helm/loan-service -n $(namespace)
           helm upgrade --install notification-service helm/notification-service -n $(namespace)
           helm upgrade --install web-ui helm/web-ui -n $(namespace)
-
