@@ -1,1 +1,23 @@
+replicaCount: 1
+
+image:
+  repository: myacr.azurecr.io/notification-service
+  tag: v1
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+containerPort: 8080
+
+resources:
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+  requests:
+    cpu: "250m"
+    memory: "256Mi"
+
+namespace: bank-app
 
